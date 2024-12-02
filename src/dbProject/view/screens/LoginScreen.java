@@ -2,79 +2,85 @@ package dbProject.view.screens;
 
 import javax.swing.*;
 import java.awt.*;
-import java.sql.*;
-
-import dbProject.DatabaseManager;
 import dbProject.TravelController;
-
-import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class LoginScreen extends JPanel {
   private final TravelController controller;
-  private final JFrame mainFrame;
 
-  public LoginScreen(TravelController controller, JFrame mainFrame) {
+  public LoginScreen(TravelController controller) {
     this.controller = controller;
-    this.mainFrame = mainFrame;
+
+    // Set layout for the login panel with more spacing for proportional appearance
     setLayout(new GridBagLayout());
+    setBackground(Color.decode("#F8BBD0")); // Soft pink background color
     GridBagConstraints gbc = new GridBagConstraints();
-    gbc.insets = new Insets(10, 10, 10, 10);
+    gbc.insets = new Insets(10, 10, 10, 10); // Spacing between components
 
-    // Title Label
-    JLabel titleLabel = new JLabel("Travel Tracker Login", JLabel.CENTER);
-    titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-    gbc.gridx = 0;
-    gbc.gridy = 0;
-    gbc.gridwidth = 2;
-    add(titleLabel, gbc);
-
-    // Username Field
-    gbc.gridwidth = 1;
-    gbc.gridx = 0;
-    gbc.gridy = 1;
-    add(new JLabel("Username:"), gbc);
+    // Create components with updated fonts and colors
+    JLabel usernameLabel = new JLabel("Username:");
+    usernameLabel.setFont(new Font("Arial", Font.BOLD, 14));
+    usernameLabel.setForeground(Color.decode("#D81B60")); // Pink color for text
 
     JTextField usernameField = new JTextField(20);
-    gbc.gridx = 1;
-    add(usernameField, gbc);
+    usernameField.setFont(new Font("Arial", Font.PLAIN, 14));
+    usernameField.setBackground(Color.decode("#F3E5F5")); // Light pink background for the text field
 
-    // Password Field
-    gbc.gridx = 0;
-    gbc.gridy = 2;
-    add(new JLabel("Password:"), gbc);
+    JLabel passwordLabel = new JLabel("Password:");
+    passwordLabel.setFont(new Font("Arial", Font.BOLD, 14));
+    passwordLabel.setForeground(Color.decode("#D81B60"));
 
     JPasswordField passwordField = new JPasswordField(20);
+    passwordField.setFont(new Font("Arial", Font.PLAIN, 14));
+    passwordField.setBackground(Color.decode("#F3E5F5"));
+
+    JButton loginButton = new JButton("Login");
+    loginButton.setFont(new Font("Arial", Font.BOLD, 14));
+    loginButton.setBackground(Color.decode("#D81B60")); // Pink background for button
+    loginButton.setForeground(Color.decode("#D81B60"));
+    loginButton.setFocusPainted(false); // Removes focus border
+
+    // Set GridBagLayout positions for better alignment
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    add(usernameLabel, gbc);
+
     gbc.gridx = 1;
+    gbc.gridy = 0;
+    add(usernameField, gbc);
+
+    gbc.gridx = 0;
+    gbc.gridy = 1;
+    add(passwordLabel, gbc);
+
+    gbc.gridx = 1;
+    gbc.gridy = 1;
     add(passwordField, gbc);
 
-    // Login Button
-    JButton loginButton = new JButton("Login");
-    gbc.gridx = 0;
-    gbc.gridy = 3;
+    gbc.gridx = 1;
+    gbc.gridy = 2;
     gbc.gridwidth = 2;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
     add(loginButton, gbc);
 
-    // Error Label
-    JLabel errorLabel = new JLabel("", JLabel.CENTER);
-    errorLabel.setForeground(Color.RED);
-    gbc.gridy = 4;
-    add(errorLabel, gbc);
+    // Add action listener to the login button
+    loginButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        String username = usernameField.getText();
+        String password = new String(passwordField.getPassword());
 
-    // Action Listener for Login Button
-    loginButton.addActionListener((ActionEvent e) -> {
-      String username = usernameField.getText().trim();
-      String password = new String(passwordField.getPassword()).trim();
+        // Notify the controller with the entered credentials
+        boolean success = controller.authenticateUser(username, password);
 
-      if (controller.authenticateUser(username, password)) {
-        // Navigate to HomeScreen on successful login
-        JOptionPane.showMessageDialog(this, "Login successful!", "Welcome", JOptionPane.INFORMATION_MESSAGE);
-        mainFrame.setContentPane(new HomeScreen(controller, mainFrame));
-        mainFrame.revalidate();
-      } else {
-        // Display error message on failed login
-        errorLabel.setText("Invalid username or password. Please try again.");
+        if (success) {
+          JOptionPane.showMessageDialog(LoginScreen.this, "Login Successful!");
+          controller.showNext("home");
+
+        } else {
+          JOptionPane.showMessageDialog(LoginScreen.this, "Invalid Username or Password. Please try again.", "Login Failed", JOptionPane.ERROR_MESSAGE);
+        }
       }
     });
   }

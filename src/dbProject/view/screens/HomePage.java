@@ -2,20 +2,16 @@ package dbProject.view.screens;
 
 import javax.swing.*;
 
-import dbProject.DatabaseManager;
 import dbProject.TravelController;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
 public class HomePage extends JPanel {
   private final TravelController controller;
-  private final JFrame mainFrame;
 
-  public HomePage(TravelController controller, JFrame mainFrame) {
+  public HomePage(TravelController controller) {
     this.controller = controller;
-    this.mainFrame = mainFrame;
     setLayout(new GridBagLayout());
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.insets = new Insets(10, 10, 10, 10);
@@ -52,24 +48,20 @@ public class HomePage extends JPanel {
 
     // Action Listeners for Buttons
     exploreButton.addActionListener((ActionEvent e) -> {
-      mainFrame.setContentPane(new ExploreScreen(controller));
-      mainFrame.revalidate();
+      controller.showNext("explore");
     });
 
     plannedTripsButton.addActionListener((ActionEvent e) -> {
-      mainFrame.setContentPane(new PlannedTripsScreen(controller));
-      mainFrame.revalidate();
+      controller.showNext("planned");
     });
 
     wishlistButton.addActionListener((ActionEvent e) -> {
-      mainFrame.setContentPane(new WishlistScreen(controller));
-      mainFrame.revalidate();
+      controller.showNext("wishlist");
     });
 
     logoutButton.addActionListener((ActionEvent e) -> {
       JOptionPane.showMessageDialog(this, "Logged out successfully!", "Goodbye", JOptionPane.INFORMATION_MESSAGE);
-      mainFrame.setContentPane(new LoginScreen(controller, mainFrame));
-      mainFrame.revalidate();
+      controller.showNext("logout");
     });
   }
 }

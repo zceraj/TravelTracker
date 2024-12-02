@@ -1,12 +1,9 @@
 package dbProject.view.screens;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.sql.*;
 
-import javax.swing.*;
 import java.awt.*;
+
 import java.awt.event.ActionEvent;
 
 import dbProject.TravelController;
@@ -74,7 +71,7 @@ public class ExploreScreen extends JPanel {
   }
 
   private void refreshPlacesList(JList<String> placesList) {
-    String[] places = controller.getExplorePlaces();
+    String[] places = controller.getPlacesToExplore().toArray(new String[0]);
     placesList.setListData(places);
   }
 }

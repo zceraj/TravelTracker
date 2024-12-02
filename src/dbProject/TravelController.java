@@ -4,21 +4,22 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import dbProject.view.MainFrame;
+import dbProject.view.screens.ExploreScreen;
+import dbProject.view.screens.HomePage;
+import dbProject.view.screens.LoginScreen;
+import dbProject.view.screens.PlannedTripsScreen;
+import dbProject.view.screens.WelcomeScreen;
+import dbProject.view.screens.WishlistScreen;
+
 public class TravelController {
   private Connection connection;
+  private MainFrame frame;
 
   public TravelController() {
-    try {
-      // Establish database connection (adjust credentials as needed)
-      String url = "jdbc:mysql://localhost:3306/travel_tracker";
-      String username = "root";
-      String password = "password";
-      connection = DriverManager.getConnection(url, username, password);
-      System.out.println("Database connection established.");
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw new RuntimeException("Failed to connect to the database.");
-    }
+    frame = new MainFrame();
+    frame.setContentPane(new WelcomeScreen(this));
+    frame.setVisible(true);
   }
 
   // ------------------- AUTHENTICATION -------------------
@@ -99,20 +100,25 @@ public class TravelController {
 
   // ------------------- PLANNED TRIPS SCREEN -------------------
 
-  public List<String> getPlannedTrips() {
+  public List<String> getPlannedTrips(String status) {
     List<String> trips = new ArrayList<>();
-    try {
-      String query = "SELECT place_name FROM planned_trips WHERE status = ?";
-      PreparedStatement stmt = connection.prepareStatement(query);
+    String query = "SELECT place_name FROM planned_trips WHERE status = ?";
+
+    try (PreparedStatement stmt = connection.prepareStatement(query)) {
+      // Set the status parameter in the query
       stmt.setString(1, status);
-      ResultSet rs = stmt.executeQuery();
-      while (rs.next()) {
-        trips.add(rs.getString("place_name"));
+
+      try (ResultSet rs = stmt.executeQuery()) {
+        // Iterate through the result set and add place names to the trips list
+        while (rs.next()) {
+          trips.add(rs.getString("place_name"));
+        }
       }
     } catch (SQLException e) {
-      e.printStackTrace();
+      e.printStackTrace(); // Log the exception
     }
-    return trips;
+
+    return trips; // Return the list of trips
   }
 
   public boolean markTripAsCompleted(String placeName) {
@@ -229,5 +235,33 @@ public class TravelController {
     } catch (SQLException e) {
       e.printStackTrace();
     }
+  }
+
+  // ------------------SHOW DIFFERENT SCREENS ---------------
+
+
+  public void showNext(String next){
+    frame.remove(frame.getContentPane());
+    switch (next) {
+      case "login":
+        frame.setContentPane(new LoginScreen(this));
+        break;
+      case "home":
+        frame.setContentPane(new HomePage(this));
+        break;
+      case "explore":
+        frame.setContentPane(new ExploreScreen(this));
+        break;
+      case "planned":
+        frame.setContentPane(new PlannedTripsScreen(this));
+        break;
+      case "wishlist":
+        frame.setContentPane(new WishlistScreen(this));
+        break;
+      case "logout":
+        frame.setContentPane(new WelcomeScreen(this));
+    }
+    frame.revalidate();
+    frame.repaint();
   }
 }

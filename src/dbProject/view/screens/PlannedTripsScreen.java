@@ -1,15 +1,8 @@
 package dbProject.view.screens;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.sql.*;
-
-import dbProject.DatabaseManager;
 import dbProject.TravelController;
-
-import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 
 public class PlannedTripsScreen extends JPanel {
@@ -80,7 +73,7 @@ public class PlannedTripsScreen extends JPanel {
   }
 
   private void refreshTripsList(JList<String> tripsList) {
-    String[] trips = controller.getPlannedTrips().toArray(new String[0]);
+    String[] trips = controller.getPlannedTrips("meow").toArray(new String[0]);
     tripsList.setListData(trips);
   }
 }

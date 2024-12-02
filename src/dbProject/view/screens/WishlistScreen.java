@@ -1,15 +1,11 @@
 package dbProject.view.screens;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.sql.*;
 
-import dbProject.DatabaseManager;
+import java.awt.*;
+
 import dbProject.TravelController;
 
-import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 
 public class WishlistScreen extends JPanel {
@@ -56,7 +52,7 @@ public class WishlistScreen extends JPanel {
     deleteButton.addActionListener((ActionEvent e) -> {
       String selectedPlace = wishlistList.getSelectedValue();
       if (selectedPlace != null) {
-        controller.deleteFromWishlist(selectedPlace);
+        controller.deleteWishlistPlace(selectedPlace);
         refreshWishlist(wishlistList);
         JOptionPane.showMessageDialog(this, "Place deleted from wishlist.");
       } else {
@@ -76,7 +72,7 @@ public class WishlistScreen extends JPanel {
   }
 
   private void refreshWishlist(JList<String> wishlistList) {
-    String[] wishlist = controller.getWishlist();
+    String[] wishlist = controller.getWishlist().toArray(new String[0]);
     wishlistList.setListData(wishlist);
   }
 }
