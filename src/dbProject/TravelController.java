@@ -18,13 +18,28 @@ public class TravelController {
 
   public TravelController() {
     frame = new MainFrame();
-    frame.setContentPane(new WelcomeScreen(this));
+//    frame.setContentPane(new WelcomeScreen(this));
+    frame.setContentPane(new HomePage(this));
     frame.setVisible(true);
+  }
+
+
+  private void initializeConnection(String user, String password) {
+    try {
+      String url = "jdbc:mysql://localhost:3306/TravelTracker";
+      // Establish connection
+      connection = DriverManager.getConnection(url, user, password);
+      System.out.println("Database connection established.");
+    } catch (SQLException e) {
+      e.printStackTrace();
+      System.out.println("Failed to establish database connection.");
+    }
   }
 
   // ------------------- AUTHENTICATION -------------------
 
   public boolean authenticateUser(String username, String password) {
+    initializeConnection(username, password); //initialize yay
     try {
       String query = "SELECT COUNT(*) FROM users WHERE username = ? AND password = ?";
       PreparedStatement stmt = connection.prepareStatement(query);
@@ -259,6 +274,7 @@ public class TravelController {
         frame.setContentPane(new WishlistScreen(this));
         break;
       case "logout":
+        closeConnection();
         frame.setContentPane(new WelcomeScreen(this));
     }
     frame.revalidate();
