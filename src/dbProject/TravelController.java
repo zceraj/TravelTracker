@@ -2,6 +2,7 @@ package dbProject;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import dbProject.view.MainFrame;
@@ -21,6 +22,7 @@ public class TravelController {
 //    frame.setContentPane(new WelcomeScreen(this));
     frame.setContentPane(new HomePage(this));
     frame.setVisible(true);
+    initializeConnection("root", "Me0wmeow");
   }
 
 
@@ -59,16 +61,21 @@ public class TravelController {
 
   public List<String> getPlacesToExplore() {
     List<String> places = new ArrayList<>();
-    try {
-      String query = "SELECT name FROM places";
-      PreparedStatement stmt = connection.prepareStatement(query);
-      ResultSet rs = stmt.executeQuery();
+    String query = "SELECT name FROM places";  // Example query, modify as per your schema
+
+    try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
       while (rs.next()) {
         places.add(rs.getString("name"));
       }
     } catch (SQLException e) {
-      e.printStackTrace();
+      e.printStackTrace();  // Handle exception properly
     }
+
+    return places;
+  }
+
+  public Collection<Object> getFilteredPlaces(List<String> filters) {
+    Collection<Object> places = new ArrayList<>();
     return places;
   }
 
