@@ -9,7 +9,6 @@ import dbProject.view.MainFrame;
 import dbProject.view.screens.ExploreScreen;
 import dbProject.view.screens.HomePage;
 import dbProject.view.screens.LoginScreen;
-import dbProject.view.screens.PlacesScreen;
 import dbProject.view.screens.PlannedTripsScreen;
 import dbProject.view.screens.WelcomeScreen;
 import dbProject.view.screens.WishlistScreen;
@@ -20,9 +19,9 @@ public class TravelController {
 
   public TravelController() {
     frame = new MainFrame();
-//    frame.setContentPane(new WelcomeScreen(this));
-    initializeConnection("root", "Me0wmeow"); // TO-DO: DELETE
-    frame.setContentPane(new WishlistScreen(this)); // TO-DO: DELETE
+    frame.setContentPane(new WelcomeScreen(this));
+//    initializeConnection("root", "Me0wmeow"); // TO-DO: DELETE
+//    frame.setContentPane(new WishlistScreen(this)); // TO-DO: DELETE
     frame.setVisible(true);
   }
 
@@ -225,9 +224,9 @@ public class TravelController {
 
   public List<String> getWishlist() {
     List<String> wishlist = new ArrayList<>();
-    String query = "SELECT places.name\n" +
+    String query = "SELECT places.city\n" +
             "FROM wishlist\n" +
-            "JOIN places ON wishlist.location_id = places.location_id;\n";
+            "JOIN places ON wishlist.place_id = places.location_id;\n";
 
     try (PreparedStatement stmt = connection.prepareStatement(query);
          ResultSet rs = stmt.executeQuery()) {
@@ -240,8 +239,6 @@ public class TravelController {
 
     return wishlist; // Return the list of wishlist place names
   }
-
-
 
   public boolean moveWishlistToPlanned(String placeName) {
     if (addPlaceToPlannedTrips(placeName)) {
