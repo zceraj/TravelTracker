@@ -59,12 +59,45 @@ public class ExploreScreen extends JPanel {
     // Add Eiffel Tower image below the buttons
     try {
       // Load the image from resources
-      ImageIcon eiffelTowerIcon = new ImageIcon(getClass().getResource("/src/dbProject/view/screens/eiffelTower.png"));
-      JLabel eiffelTowerLabel = new JLabel(eiffelTowerIcon);
-      filterPanel.add(eiffelTowerLabel);
+      ImageIcon originalIcon = new ImageIcon(getClass().getResource("/eiffelTower.png"));
+
+      // Scale the image to a smaller size (e.g., 100x150 pixels)
+      Image scaledImage = originalIcon.getImage().getScaledInstance(100, 150, Image.SCALE_SMOOTH);
+      ImageIcon scaledIcon = new ImageIcon(scaledImage);
+
+      // Create a JLabel with the scaled image
+      JLabel eiffelTowerLabel = new JLabel(scaledIcon);
+      eiffelTowerLabel.setAlignmentX(Component.LEFT_ALIGNMENT); // Center align in the layout
+
+
+      // Add some spacing and add the image to the filter panel
+      filterPanel.add(Box.createVerticalStrut(20)); // Add spacing
+      filterPanel.add(eiffelTowerLabel); // Add the image label
     } catch (Exception e) {
       System.err.println("Error loading Eiffel Tower image: " + e.getMessage());
     }
+
+    // Add Palm Tree image below the Eiffel Tower
+    try {
+      // Load the image from resources
+      ImageIcon originalPalmTreeIcon = new ImageIcon(getClass().getResource("/palmTree.png"));
+
+      // Scale the image to a smaller size (e.g., 100x150 pixels)
+      Image scaledPalmTreeImage = originalPalmTreeIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+      ImageIcon scaledPalmTreeIcon = new ImageIcon(scaledPalmTreeImage);
+
+      // Create a JLabel with the scaled image
+      JLabel palmTreeLabel = new JLabel(scaledPalmTreeIcon);
+      palmTreeLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+
+      // Add some spacing and add the image to the filter panel
+      filterPanel.add(Box.createVerticalStrut(20)); // Add spacing
+      filterPanel.add(palmTreeLabel); // Add the image label
+    } catch (Exception e) {
+      System.err.println("Error loading Palm Tree image: " + e.getMessage());
+    }
+
 
 
     outerPanel.add(filterPanel, BorderLayout.AFTER_LINE_ENDS);

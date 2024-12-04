@@ -73,6 +73,7 @@ public class LoginScreen extends JPanel {
 
         // Notify the controller with the entered credentials
         boolean success = controller.authenticateUser(username, password);
+        System.out.println("username: " + username + " password: " + password);
 
         if (success) {
           JOptionPane.showMessageDialog(LoginScreen.this, "Login Successful!");

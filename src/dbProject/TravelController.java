@@ -19,49 +19,38 @@ public class TravelController {
 
   public TravelController() {
     frame = new MainFrame();
-//    frame.setContentPane(new WelcomeScreen(this));
-    frame.setContentPane(new HomePage(this));
+    frame.setContentPane(new WelcomeScreen(this));
+//    initializeConnection("root", "Me0wmeow"); // TO-DO: DELETE
+//    frame.setContentPane(new ExploreScreen(this)); // TO-DO: DELETE
     frame.setVisible(true);
-    initializeConnection("root", "Me0wmeow");
   }
 
 
-  private void initializeConnection(String user, String password) {
+  private boolean initializeConnection(String user, String password) {
     try {
       String url = "jdbc:mysql://localhost:3306/TravelTracker";
       // Establish connection
       connection = DriverManager.getConnection(url, user, password);
       System.out.println("Database connection established.");
+      return true;
     } catch (SQLException e) {
       e.printStackTrace();
       System.out.println("Failed to establish database connection.");
+      return false;
     }
   }
 
   // ------------------- AUTHENTICATION -------------------
 
   public boolean authenticateUser(String username, String password) {
-    initializeConnection(username, password); //initialize yay
-    try {
-      String query = "SELECT COUNT(*) FROM users WHERE username = ? AND password = ?";
-      PreparedStatement stmt = connection.prepareStatement(query);
-      stmt.setString(1, username);
-      stmt.setString(2, password);
-      ResultSet rs = stmt.executeQuery();
-      if (rs.next()) {
-        return rs.getInt(1) > 0; // User exists
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-    }
-    return false;
+    return initializeConnection(username, password); //initialize yay
   }
 
   // ------------------- EXPLORE SCREEN -------------------
 
   public List<String> getPlacesToExplore() {
     List<String> places = new ArrayList<>();
-    String query = "SELECT name FROM places";  // Example query, modify as per your schema
+    String query = "SELECT city FROM places";
 
     try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
       while (rs.next()) {
