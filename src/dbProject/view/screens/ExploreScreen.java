@@ -17,6 +17,8 @@ public class ExploreScreen extends JPanel {
     filters = new ArrayList<>();
     setLayout(new BorderLayout());
 
+// ----------------------------------------------BACKGROUND----------------------------------------
+
     // Set the background color to a light pink
     setBackground(new Color(255, 182, 193)); // Light pink background
 
@@ -40,6 +42,7 @@ public class ExploreScreen extends JPanel {
     // Add the title panel to the outerPanel at the top
     outerPanel.add(titlePanel, BorderLayout.NORTH);
 
+// ----------------------------------------------RATING BUTTONS----------------------------------------
     // Panel for filter buttons (Country, Activity, Rating)
     JPanel filterPanel = new JPanel();
     filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.Y_AXIS)); // Stack components vertically
@@ -98,10 +101,9 @@ public class ExploreScreen extends JPanel {
       System.err.println("Error loading Palm Tree image: " + e.getMessage());
     }
 
-
-
     outerPanel.add(filterPanel, BorderLayout.AFTER_LINE_ENDS);
 
+// ----------------------------------------------PLACES----------------------------------------
     // Center panel for the list of places
     JPanel centerPanel = new JPanel(new GridLayout(1, 2, 20, 0)); // Two-column layout
     centerPanel.setBackground(new Color(255, 182, 193)); // Match background color
@@ -119,6 +121,7 @@ public class ExploreScreen extends JPanel {
     centerPanel.add(allPlacesPanel);
     outerPanel.add(centerPanel, BorderLayout.CENTER);
 
+// ------------------------------------ACTION BUTTONS----------------------------------------
     // Action buttons panel
     JPanel buttonPanel = new JPanel(new FlowLayout());
     buttonPanel.setBackground(new Color(255, 182, 193)); // Match background color
@@ -141,21 +144,15 @@ public class ExploreScreen extends JPanel {
 
     // Action listeners for filter buttons
     filterCountryButton.addActionListener((ActionEvent e) -> {
-      // Add logic for filtering places by country
-      // Example: controller.filterByCountry();
-      JOptionPane.showMessageDialog(this, "Filter by Country clicked.");
+      buttonClicker("Country");
     });
 
     filterActivityButton.addActionListener((ActionEvent e) -> {
-      // Add logic for filtering places by activity
-      // Example: controller.filterByActivity();
-      JOptionPane.showMessageDialog(this, "Filter by Activity clicked.");
+      buttonClicker("Activity");
     });
 
     filterRatingButton.addActionListener((ActionEvent e) -> {
-      // Add logic for filtering places by rating
-      // Example: controller.filterByRating();
-      JOptionPane.showMessageDialog(this, "Filter by Rating clicked.");
+      buttonClicker("Rating");
     });
 
     // Action listeners for other buttons
@@ -191,6 +188,17 @@ public class ExploreScreen extends JPanel {
         JOptionPane.showMessageDialog(this, "Please select a place!", "Error", JOptionPane.ERROR_MESSAGE);
       }
     });
+  }
+
+  private void buttonClicker(String filter){
+    if (filters.contains(filter)) {
+      JOptionPane.showMessageDialog(this, "Filter by " + filter + " unclicked.");
+      filters.remove(filter);
+    }
+    else{
+      JOptionPane.showMessageDialog(this, "Filter by " + filter + " clicked.");
+      filters.add(filter);
+    }
   }
 
   // Helper method to create a styled panel for places

@@ -9,6 +9,7 @@ import dbProject.view.MainFrame;
 import dbProject.view.screens.ExploreScreen;
 import dbProject.view.screens.HomePage;
 import dbProject.view.screens.LoginScreen;
+import dbProject.view.screens.PlacesScreen;
 import dbProject.view.screens.PlannedTripsScreen;
 import dbProject.view.screens.WelcomeScreen;
 import dbProject.view.screens.WishlistScreen;
@@ -21,7 +22,7 @@ public class TravelController {
     frame = new MainFrame();
     frame.setContentPane(new WelcomeScreen(this));
 //    initializeConnection("root", "Me0wmeow"); // TO-DO: DELETE
-//    frame.setContentPane(new ExploreScreen(this)); // TO-DO: DELETE
+//    frame.setContentPane(new PlannedTripsScreen(this)); // TO-DO: DELETE
     frame.setVisible(true);
   }
 
@@ -196,6 +197,27 @@ public class TravelController {
       e.printStackTrace();
     }
     return false;
+  }
+
+  public String getTripNotes(String tripName) {
+    String additionalInfo = "";
+    String query = " SELECT additional_information FROM planned_trips WHERE place_id = ( SELECT location_id FROM places WHERE name = ?)";
+
+    try (PreparedStatement stmt = connection.prepareStatement(query)) {
+      // Set the trip name parameter
+      stmt.setString(1, tripName);
+
+      try (ResultSet rs = stmt.executeQuery()) {
+        // Retrieve the additional information from the result set
+        if (rs.next()) {
+          additionalInfo = rs.getString("additional_information");
+        }
+      }
+    } catch (SQLException e) {
+      e.printStackTrace(); // Log the exception
+    }
+
+    return additionalInfo.isEmpty() ? "No additional information available" : additionalInfo;
   }
 
   // ------------------- WISHLIST SCREEN -------------------
