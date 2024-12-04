@@ -123,7 +123,7 @@ public class PlannedTripsScreen extends JPanel {
   }
 
   private void refreshTripsList(JList<String> tripsList) {
-    List<String> trips = controller.getPlannedTrips("planned");
+    List<String> trips = controller.getPlannedTrips(false);
 
     if (trips.isEmpty()) {
       tripsList.setListData(new String[] {"List is empty"});

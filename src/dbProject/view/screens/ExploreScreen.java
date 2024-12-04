@@ -122,6 +122,7 @@ public class ExploreScreen extends JPanel {
     outerPanel.add(centerPanel, BorderLayout.CENTER);
 
 // ------------------------------------ACTION BUTTONS----------------------------------------
+// ------------------------------------ACTION BUTTONS----------------------------------------
     // Action buttons panel
     JPanel buttonPanel = new JPanel(new FlowLayout());
     buttonPanel.setBackground(new Color(255, 182, 193)); // Match background color
@@ -129,11 +130,19 @@ public class ExploreScreen extends JPanel {
     JButton viewDetailsButton = createStyledButton("View Details");
     JButton addToPlannedButton = createStyledButton("Add to Planned");
     JButton addToWishlistButton = createStyledButton("Add to Wishlist");
+    JButton homeButton = createStyledButton("Home"); // New Home button
 
     buttonPanel.add(viewDetailsButton);
     buttonPanel.add(addToPlannedButton);
     buttonPanel.add(addToWishlistButton);
+    buttonPanel.add(homeButton); // Add Home button to the panel
     outerPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+    // Add action listener for the Home button
+    homeButton.addActionListener((ActionEvent e) -> {
+      controller.showNext("home"); // Call a method in the controller to navigate to the Home screen
+    });
+
 
     // Add the outer panel to the main ExploreScreen panel
     add(outerPanel, BorderLayout.CENTER);

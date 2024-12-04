@@ -20,9 +20,9 @@ public class TravelController {
 
   public TravelController() {
     frame = new MainFrame();
-    frame.setContentPane(new WelcomeScreen(this));
-//    initializeConnection("root", "Me0wmeow"); // TO-DO: DELETE
-//    frame.setContentPane(new PlannedTripsScreen(this)); // TO-DO: DELETE
+//    frame.setContentPane(new WelcomeScreen(this));
+    initializeConnection("root", "Me0wmeow"); // TO-DO: DELETE
+    frame.setContentPane(new WishlistScreen(this)); // TO-DO: DELETE
     frame.setVisible(true);
   }
 
@@ -112,13 +112,13 @@ public class TravelController {
 
   // ------------------- PLANNED TRIPS SCREEN -------------------
 
-  public List<String> getPlannedTrips(String status) {
+  public List<String> getPlannedTrips(boolean completed) {
     List<String> trips = new ArrayList<>();
-    String query = "SELECT place_name FROM planned_trips WHERE status = ?";
+    String query = "SELECT p.name AS place_name FROM planned_trips pt JOIN places p ON pt.place_id = p.location_id WHERE pt.completed = ? ";
 
     try (PreparedStatement stmt = connection.prepareStatement(query)) {
-      // Set the status parameter in the query
-      stmt.setString(1, status);
+      // Set the completed parameter in the query
+      stmt.setBoolean(1, completed);
 
       try (ResultSet rs = stmt.executeQuery()) {
         // Iterate through the result set and add place names to the trips list
@@ -132,6 +132,7 @@ public class TravelController {
 
     return trips; // Return the list of trips
   }
+
 
   public boolean markTripAsCompleted(String placeName) {
     try {
@@ -224,18 +225,23 @@ public class TravelController {
 
   public List<String> getWishlist() {
     List<String> wishlist = new ArrayList<>();
-    try {
-      String query = "SELECT place_name FROM wishlist";
-      PreparedStatement stmt = connection.prepareStatement(query);
-      ResultSet rs = stmt.executeQuery();
+    String query = "SELECT places.name\n" +
+            "FROM wishlist\n" +
+            "JOIN places ON wishlist.location_id = places.location_id;\n";
+
+    try (PreparedStatement stmt = connection.prepareStatement(query);
+         ResultSet rs = stmt.executeQuery()) {
       while (rs.next()) {
         wishlist.add(rs.getString("place_name"));
       }
     } catch (SQLException e) {
-      e.printStackTrace();
+      e.printStackTrace(); // Log the exception
     }
-    return wishlist;
+
+    return wishlist; // Return the list of wishlist place names
   }
+
+
 
   public boolean moveWishlistToPlanned(String placeName) {
     if (addPlaceToPlannedTrips(placeName)) {
