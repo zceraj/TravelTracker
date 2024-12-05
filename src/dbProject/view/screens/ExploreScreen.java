@@ -122,7 +122,6 @@ public class ExploreScreen extends JPanel {
     outerPanel.add(centerPanel, BorderLayout.CENTER);
 
 // ------------------------------------ACTION BUTTONS----------------------------------------
-// ------------------------------------ACTION BUTTONS----------------------------------------
     // Action buttons panel
     JPanel buttonPanel = new JPanel(new FlowLayout());
     buttonPanel.setBackground(new Color(255, 182, 193)); // Match background color
@@ -169,8 +168,8 @@ public class ExploreScreen extends JPanel {
       JList<String> allPlacesList = (JList<String>) allPlacesScrollPane.getViewport().getView();
       String selectedPlace = allPlacesList.getSelectedValue();
       if (selectedPlace != null) {
-        String details = controller.getPlaceDetails(selectedPlace);
-        JOptionPane.showMessageDialog(this, details, "Place Details", JOptionPane.INFORMATION_MESSAGE);
+        controller.showNext("place " + selectedPlace);
+        JOptionPane.showMessageDialog(this, "Place Details", "success", JOptionPane.INFORMATION_MESSAGE);
       } else {
         JOptionPane.showMessageDialog(this, "Please select a place!", "Error", JOptionPane.ERROR_MESSAGE);
       }

@@ -3,15 +3,41 @@ package dbProject.view.screens;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.Arrays;
 
 import dbProject.TravelController;
 
 public class PlacesScreen extends JPanel {
+  private TravelController controller;
+  String countryName;
+  int rating;
+  String[]activities;
+  String[] foods;
 
-  private TravelController controller;  // Assuming there's a Controller class handling the logic
 
-  public PlacesScreen(String cityName, String countryName, int rating, String[] activities, String[] foods, TravelController controller) {
+
+  public PlacesScreen(String cityName, TravelController controller) {
     this.controller = controller;
+    String[] info = controller.getPlaceInfo(cityName);
+
+    // Assign the country name (assuming it's the first element in the info array)
+    countryName = info[0];
+
+    // Assign the rating (assuming it's the second element and needs to be parsed as an integer)
+    rating = Integer.parseInt(info[1]);
+
+    // Determine where the activities start in the info array and assign them
+    int activitiesStartIndex = 2;
+    int foodsStartIndex = activitiesStartIndex;
+
+    // Assuming activities are in the array after the country and rating
+    // You may need to adjust the logic based on the structure of your info array
+    while (foodsStartIndex < info.length && info[foodsStartIndex] != null && !info[foodsStartIndex].isEmpty()) {
+      foodsStartIndex++;
+    }
+
+    activities = Arrays.copyOfRange(info, activitiesStartIndex, foodsStartIndex);
+    foods = Arrays.copyOfRange(info, foodsStartIndex, info.length);
 
     // Set the main layout with a little padding and space between components
     setLayout(new BorderLayout(20, 20));
