@@ -77,7 +77,7 @@ public class PlannedTripsScreen extends JPanel {
       if (selectedTrip != null) {
         String newDetails = JOptionPane.showInputDialog(this, "Edit trip details:", selectedTrip);
         if (newDetails != null) {
-          controller.editPlannedTrip(selectedTrip, newDetails);
+          controller.editPlannedTrip(" ", " ");
           refreshTripsList(tripsList);
           JOptionPane.showMessageDialog(this, "Trip updated.");
         }

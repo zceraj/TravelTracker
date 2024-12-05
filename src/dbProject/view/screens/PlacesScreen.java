@@ -24,7 +24,8 @@ public class PlacesScreen extends JPanel {
     countryName = info[0];
 
     // Assign the rating (assuming it's the second element and needs to be parsed as an integer)
-    rating = Integer.parseInt(info[1]);
+    Double myRating = Double.parseDouble(info[1]);
+    rating = myRating.intValue();
 
     // Determine where the activities start in the info array and assign them
     int activitiesStartIndex = 2;

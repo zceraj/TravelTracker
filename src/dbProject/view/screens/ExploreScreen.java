@@ -179,8 +179,9 @@ public class ExploreScreen extends JPanel {
       JList<String> allPlacesList = (JList<String>) allPlacesScrollPane.getViewport().getView();
       String selectedPlace = allPlacesList.getSelectedValue();
       if (selectedPlace != null) {
-        controller.addPlaceToPlannedTrips(selectedPlace);
-        JOptionPane.showMessageDialog(this, selectedPlace + " added to planned trips.");
+        if (controller.addPlaceToPlannedTrips(selectedPlace)) {
+          JOptionPane.showMessageDialog(this, selectedPlace + " added to planned trips.");
+        }
       } else {
         JOptionPane.showMessageDialog(this, "Please select a place!", "Error", JOptionPane.ERROR_MESSAGE);
       }
