@@ -152,15 +152,15 @@ public class ExploreScreen extends JPanel {
 
     // Action listeners for filter buttons
     filterCountryButton.addActionListener((ActionEvent e) -> {
-      buttonClicker("Country");
+      buttonClicker("country = 'France'");
     });
 
     filterActivityButton.addActionListener((ActionEvent e) -> {
-      buttonClicker("Activity");
+      buttonClicker("activity_name = 'Skiing'");
     });
 
     filterRatingButton.addActionListener((ActionEvent e) -> {
-      buttonClicker("Rating");
+      buttonClicker("rating > 4");
     });
 
     // Action listeners for other buttons
@@ -247,7 +247,6 @@ public class ExploreScreen extends JPanel {
     } else {
       places = controller.getFilteredPlaces(filters).toArray(new String[0]); // You can adjust this as needed
     }
-
     if (places.length == 0) {
       placesList.setListData(new String[]{"Looks like this list is empty for now"});
     } else {

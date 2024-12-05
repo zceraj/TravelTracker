@@ -37,7 +37,7 @@ public class PlacesScreen extends JPanel {
       foodsStartIndex++;
     }
 
-    activities = Arrays.copyOfRange(info, activitiesStartIndex, foodsStartIndex);
+    activities = controller.getActivities(cityName).toArray(new String[0]);
     foods = Arrays.copyOfRange(info, foodsStartIndex, info.length);
 
     // Set the main layout with a little padding and space between components
@@ -82,6 +82,8 @@ public class PlacesScreen extends JPanel {
     listsPanel.setLayout(new GridLayout(1, 2, 20, 20));
     listsPanel.setBackground(new Color(255, 240, 245)); // Lighter pink for list panel background
 
+    titlePanel.add(ratingPanel, BorderLayout.SOUTH);
+
     // Activities List
     JPanel activitiesPanel = new JPanel(new BorderLayout());
     activitiesPanel.setBackground(new Color(255, 240, 245)); // Match background color
@@ -120,8 +122,7 @@ public class PlacesScreen extends JPanel {
 
     // Adding the main panels to the screen
     add(titlePanel, BorderLayout.NORTH);
-    add(ratingPanel, BorderLayout.CENTER);
-    add(listsPanel, BorderLayout.SOUTH);
+    add(listsPanel, BorderLayout.CENTER);
 
     // **New functionality for buttons**
     // Panel for buttons (Home, Quit, Add to Planned, Add to Wishlist)

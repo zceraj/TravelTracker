@@ -32,6 +32,9 @@ public class HomePage extends JPanel {
     JButton wishlistButton = createStyledButton("Wishlist");
     JButton logoutButton = createStyledButton("Logout");
 
+    // "Make New Place" button
+    JButton makeNewPlaceButton = createStyledButton("Make New Place");
+
     // Position the buttons
     gbc.gridwidth = 1;
     gbc.gridx = 0;
@@ -44,42 +47,33 @@ public class HomePage extends JPanel {
     gbc.gridx = 2;
     add(wishlistButton, gbc);
 
+    // Make New Place Button
+    gbc.gridx = 0;
+    gbc.gridy = 2;
+    add(makeNewPlaceButton, gbc);
+
     // Logout Button
     gbc.gridx = 1;
-    gbc.gridy = 2;
+    gbc.gridy = 3;
     add(logoutButton, gbc);
 
-    String[] planeImages = {
-            "/PlanePic1.png", "/PlanePic2.png", "/PlanePic3.png",
-    };
-
-    // Set desired mini size for the images
+    // Set plane images (same as your original code)
+    String[] planeImages = {"/PlanePic1.png", "/PlanePic2.png", "/PlanePic3.png"};
     int miniWidth = 50;  // Set the width for mini images
     int miniHeight = 50; // Set the height for mini images
-
-    // Display the images in the grid
     gbc.gridwidth = 1;
     gbc.gridx = 0;
-    gbc.gridy = 3;
+    gbc.gridy = 4;
     for (int i = 0; i < 3; i++) {
-      // Load each plane image
       ImageIcon planeIcon = new ImageIcon(getClass().getResource("/PlanePic.png"));
       if (planeIcon.getImageLoadStatus() != MediaTracker.COMPLETE) {
         System.out.println("Image not loaded successfully: " + planeImages[i]);
       }
-
-      // Scale the image to the mini size
       Image scaledImage = planeIcon.getImage().getScaledInstance(miniWidth, miniHeight, Image.SCALE_SMOOTH);
       planeIcon = new ImageIcon(scaledImage);
-
-      // Create a label for each plane image
       JLabel planeLabel = new JLabel(planeIcon);
-
-      // Add the plane label to the grid
       add(planeLabel, gbc);
       gbc.gridx++;  // Move to the next column for the next image
-
-      // After placing the sixth image, move to the next row
       if ((i + 1) % 3 == 0) {
         gbc.gridx = 0;
         gbc.gridy++;
@@ -104,6 +98,11 @@ public class HomePage extends JPanel {
       controller.showNext("logout");
     });
 
+    // Action listener for the "Make New Place" button
+    makeNewPlaceButton.addActionListener((ActionEvent e) -> {
+      createNewPlace();
+    });
+
     repaint();
   }
 
@@ -119,4 +118,49 @@ public class HomePage extends JPanel {
     button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)); // Hand cursor for interactivity
     return button;
   }
+
+  // Method to handle the creation of a new place
+  private void createNewPlace() {
+    // Show a dialog to collect place details
+    JPanel panel = new JPanel(new GridLayout(5, 2));
+
+    JTextField nameField = new JTextField();
+    JTextField countryField = new JTextField();
+    JTextField foodField = new JTextField();
+    JTextField ratingField = new JTextField();
+
+    panel.add(new JLabel("Place Name:"));
+    panel.add(nameField);
+    panel.add(new JLabel("Country:"));
+    panel.add(countryField);
+    panel.add(new JLabel("Food:"));
+    panel.add(foodField);
+    panel.add(new JLabel("Calculated Rating (float):"));
+    panel.add(ratingField);
+
+    int option = JOptionPane.showConfirmDialog(this, panel, "Enter New Place Information", JOptionPane.OK_CANCEL_OPTION);
+
+    if (option == JOptionPane.OK_OPTION) {
+      String placeName = nameField.getText();
+      String country = countryField.getText();
+      String food = foodField.getText();
+      String ratingText = ratingField.getText();
+
+      // Validate the rating input to ensure it's a valid float
+      float calculatedRating = 0f;
+      try {
+        calculatedRating = Float.parseFloat(ratingText);
+      } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "Invalid rating input. Please enter a valid float.", "Error", JOptionPane.ERROR_MESSAGE);
+        return; // Exit the method if the rating is invalid
+      }
+
+      // Call the addNewPlace method to insert the place into the database
+      controller.addNewPlace(placeName, country, food, calculatedRating);
+
+      // Notify the user of success
+      JOptionPane.showMessageDialog(this, "New place added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+    }
+  }
+
 }

@@ -22,6 +22,7 @@ public class PlannedTripsScreen extends JPanel {
 
     // List of Planned Trips
     JList<String> tripsList = new JList<>();
+    refreshTripsList(tripsList);
     tripsList.setFont(new Font("Arial", Font.PLAIN, 16));  // Set font for the list
     JScrollPane listScrollPane = new JScrollPane(tripsList);
     listScrollPane.setPreferredSize(new Dimension(400, 200));  // Fixed size for the list
@@ -35,7 +36,7 @@ public class PlannedTripsScreen extends JPanel {
     // Button styling
     JButton editButton = new JButton("Edit Trip");
     JButton deleteButton = new JButton("Delete Trip");
-    JButton toggleCompletedButton = new JButton("Mark as Completed");
+    JButton markTripAsCompleted = new JButton("Mark as Completed");
     JButton homeButton = new JButton("Home");
     JButton quitButton = new JButton("Quit");
 
@@ -48,9 +49,9 @@ public class PlannedTripsScreen extends JPanel {
     deleteButton.setFont(new Font("Arial", Font.BOLD, 14));
     deleteButton.setPreferredSize(new Dimension(140, 40));  // Button size
 
-    toggleCompletedButton.setBackground(new Color(255, 182, 193));  // Soft pink button color
-    toggleCompletedButton.setFont(new Font("Arial", Font.BOLD, 14));
-    toggleCompletedButton.setPreferredSize(new Dimension(180, 40));  // Button size
+    markTripAsCompleted.setBackground(new Color(255, 182, 193));  // Soft pink button color
+    markTripAsCompleted.setFont(new Font("Arial", Font.BOLD, 14));
+    markTripAsCompleted.setPreferredSize(new Dimension(180, 40));  // Button size
 
     homeButton.setBackground(new Color(255, 182, 193));  // Soft pink button color
     homeButton.setFont(new Font("Arial", Font.BOLD, 14));
@@ -64,7 +65,7 @@ public class PlannedTripsScreen extends JPanel {
     buttonPanel.add(homeButton);
     buttonPanel.add(editButton);
     buttonPanel.add(deleteButton);
-    buttonPanel.add(toggleCompletedButton);
+    buttonPanel.add(markTripAsCompleted);
     buttonPanel.add(quitButton);
     add(buttonPanel, BorderLayout.SOUTH);
 
@@ -75,9 +76,9 @@ public class PlannedTripsScreen extends JPanel {
     editButton.addActionListener((ActionEvent e) -> {
       String selectedTrip = tripsList.getSelectedValue();
       if (selectedTrip != null) {
-        String newDetails = JOptionPane.showInputDialog(this, "Edit trip details:", selectedTrip);
+        String newDetails = JOptionPane.showInputDialog(this, "Edit trip details:", selectedTrip.split(" Notes: ")[1]);
         if (newDetails != null) {
-          controller.editPlannedTrip(" ", " ");
+          controller.editPlannedTrip(selectedTrip.split(" - ")[0], newDetails);
           refreshTripsList(tripsList);
           JOptionPane.showMessageDialog(this, "Trip updated.");
         }
@@ -89,18 +90,28 @@ public class PlannedTripsScreen extends JPanel {
     deleteButton.addActionListener((ActionEvent e) -> {
       String selectedTrip = tripsList.getSelectedValue();
       if (selectedTrip != null) {
-        controller.deletePlannedTrip(selectedTrip);
+        // Split the selected trip string at " - " and take the first part (the place name)
+        String placeName = selectedTrip.split(" - ")[0];
+
+        // Pass the place name to the delete method
+        controller.deletePlannedTrip(placeName);
+
+        // Refresh the trips list
         refreshTripsList(tripsList);
+
+        // Show a success message
         JOptionPane.showMessageDialog(this, "Trip deleted.");
       } else {
+        // Show an error message if no trip is selected
         JOptionPane.showMessageDialog(this, "Please select a trip!", "Error", JOptionPane.ERROR_MESSAGE);
       }
     });
 
-    toggleCompletedButton.addActionListener((ActionEvent e) -> {
+
+    markTripAsCompleted.addActionListener((ActionEvent e) -> {
       String selectedTrip = tripsList.getSelectedValue();
       if (selectedTrip != null) {
-        controller.toggleTripCompletion(selectedTrip);
+        controller.markTripAsCompleted(selectedTrip);
         JOptionPane.showMessageDialog(this, "Trip completion status toggled.");
       } else {
         JOptionPane.showMessageDialog(this, "Please select a trip!", "Error", JOptionPane.ERROR_MESSAGE);

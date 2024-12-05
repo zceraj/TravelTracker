@@ -21,9 +21,9 @@ public class TravelController {
 
   public TravelController() {
     frame = new MainFrame();
-//    frame.setContentPane(new WelcomeScreen(this));
-    initializeConnection("root", "Me0wmeow"); // TO-DO: DELETE
-    frame.setContentPane(new HomePage(this)); // TO-DO: DELETE
+    frame.setContentPane(new WelcomeScreen(this));
+//    initializeConnection("root", "Me0wmeow"); // TO-DO: DELETE
+//    frame.setContentPane(new HomePage(this)); // TO-DO: DELETE
     frame.setVisible(true);
   }
 
@@ -78,17 +78,17 @@ public class TravelController {
 
       return false; // User creation failed
     } catch (SQLException e) {
-      e.printStackTrace();
-      return false; // Return false if there is a SQL exception
+      e.toString();
     } finally {
+      // Removed connection close to prevent premature closing
       try {
         if (generatedKeys != null) generatedKeys.close();
         if (statement != null) statement.close();
-        if (connection != null) connection.close();
       } catch (SQLException e) {
         e.printStackTrace();
       }
     }
+    return false;
   }
 
 
@@ -109,10 +109,81 @@ public class TravelController {
     return places;
   }
 
-
   public Collection<Object> getFilteredPlaces(List<String> filters) {
     Collection<Object> places = new ArrayList<>();
+
+    // Base SQL query
+    StringBuilder queryBuilder = new StringBuilder("SELECT * FROM places WHERE 1=1");
+
+    // List to store parameter values for prepared statement
+    List<Object> parameters = new ArrayList<>();
+
+    // Dynamically build the WHERE conditions based on the filters provided
+    for (String filter : filters) {
+      // Assume the filter format is key=value (e.g., "name=Paris")
+      String[] filterParts = filter.split(" ");
+      if (filterParts.length == 2) {
+        String key = filterParts[0];
+        String value = filterParts[1];
+
+        // Add filter condition to the query
+        queryBuilder.append(" AND ").append(key).append(" = ?");
+        parameters.add(value);
+      }
+    }
+
+    // Convert the queryBuilder to a String
+    String query = queryBuilder.toString();
+
+    // Execute the query using PreparedStatement
+    try (PreparedStatement stmt = connection.prepareStatement(query)) {
+      // Set the parameters for the PreparedStatement
+      for (int i = 0; i < parameters.size(); i++) {
+        stmt.setObject(i + 1, parameters.get(i));
+      }
+
+      // Execute the query and process the result set
+      try (ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+          // Process the result set, for example, adding the place_id to the list
+          places.add(rs.getObject("places_name"));  // Or any other relevant data from the result set
+        }
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();  // Log the exception for debugging
+    }
+
     return places;
+  }
+
+  // Method to get all activities for a specific place by place name
+  public List<String> getActivities(String placeName) {
+    List<String> activities = new ArrayList<>();
+
+    // SQL query to fetch activities for a place by its name
+    String query = "SELECT activity_id " +
+            "FROM place_activities a " +
+            "JOIN places p ON a.place_id = p.places_name " +
+            "WHERE p.places_name = ?";
+
+    // Using try-with-resources to automatically close resources
+    try (PreparedStatement statement = connection.prepareStatement(query)) {
+      // Set the placeName parameter in the query
+      statement.setString(1, placeName);
+
+      // Execute the query
+      try (ResultSet resultSet = statement.executeQuery()) {
+        // Iterate over the result set and add activities to the list
+        while (resultSet.next()) {
+          String activity = resultSet.getString("activity_id");
+          activities.add(activity);
+        }
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();  // Handle any SQL exceptions
+    }
+
+    return activities;  // Return the list of activities
   }
 
   public String getPlaceDetails(String placeName) {
@@ -133,18 +204,18 @@ public class TravelController {
   public boolean addPlaceToPlannedTrips(String placeName) {
     try {
       // Query to get the place_id for the given placeName
-      String placeQuery = "SELECT places_name FROM places WHERE places_name = ?";
+      String placeQuery = "SELECT places_name FROM places WHERE places_name = ?";  // Select place_id instead of places_name
       PreparedStatement stmt = connection.prepareStatement(placeQuery);
       stmt.setString(1, placeName);
 
       ResultSet rs = stmt.executeQuery();
       if (rs.next()) {
-        int placeId = rs.getInt("location_id");  // Corrected column name here
+        String placeId = rs.getString("places_name");  // Correctly fetch place_id as an int
 
         // Now insert the place_id into the planned_trips table
-        String insertQuery = "INSERT INTO planned_trips (places_name, completed) VALUES (?, 'in progress')";
+        String insertQuery = "INSERT INTO planned_trips (place_id, completed) VALUES (?, false)";
         PreparedStatement insertStmt = connection.prepareStatement(insertQuery);
-        insertStmt.setInt(1, placeId);  // Use place_id here
+        insertStmt.setString(1, placeId);  // Use place_id here as an int
         insertStmt.executeUpdate();
         return true;
       } else {
@@ -159,36 +230,40 @@ public class TravelController {
 
 
 
+
   // ------------------- PLANNED TRIPS SCREEN -------------------
 
   public List<String> getPlannedTrips(boolean completed) {
     List<String> trips = new ArrayList<>();
-    String query = "SELECT p.places_name AS place_name FROM planned_trips pt JOIN places p ON pt.place_id = p.location_id WHERE pt.completed = ? ";
+
+    // Adjust the query to use the completed parameter
+    String query = "SELECT place_id FROM planned_trips WHERE completed = ?;";
 
     try (PreparedStatement stmt = connection.prepareStatement(query)) {
-      // Set the completed parameter in the query
-      stmt.setBoolean(1, completed);
+      // Set the boolean parameter for completed status
+      stmt.setBoolean(1, completed); // Use the passed 'completed' parameter
 
+      // Execute the query and process the result set
       try (ResultSet rs = stmt.executeQuery()) {
-        // Iterate through the result set and add place names to the trips list
         while (rs.next()) {
-          trips.add(rs.getString("place_name"));
+          // Retrieve the "place_id" from the result set
+          trips.add(rs.getString("place_id"));
         }
       }
     } catch (SQLException e) {
-      e.printStackTrace(); // Log the exception
+      e.printStackTrace(); // Log the exception for debugging
     }
 
     return trips; // Return the list of trips
   }
 
-
   public boolean markTripAsCompleted(String placeName) {
     try {
-      String query = "UPDATE planned_trips SET completed = 'completed' WHERE place_name = ?";
+      String query = "UPDATE planned_trips SET completed = 'completed' WHERE place_id = ?";
       PreparedStatement stmt = connection.prepareStatement(query);
       stmt.setString(1, placeName);
       stmt.executeUpdate();
+      showNext("planned_trips");
       return true;
     } catch (SQLException e) {
       e.printStackTrace();
@@ -198,7 +273,7 @@ public class TravelController {
 
   public boolean deletePlannedTrip(String placeName) {
     // Step 1: Query to fetch place_id based on placeName from the places table
-    String selectPlaceIdQuery = "SELECT location_id FROM places WHERE places_name = ?";
+    String selectPlaceIdQuery = "SELECT places_name FROM places WHERE places_name = ?";
     // Step 2: Query to delete the planned trip from planned_trips using place_id
     String deleteQuery = "DELETE FROM planned_trips WHERE place_id = ?";
 
@@ -210,10 +285,10 @@ public class TravelController {
       selectPlaceIdStmt.setString(1, placeName);
       try (ResultSet rs = selectPlaceIdStmt.executeQuery()) {
         if (rs.next()) {
-          int placeId = rs.getInt("location_id");
+          String placeId = rs.getString("places_name");
 
           // Use the resolved place_id to delete the planned trip
-          deleteStmt.setInt(1, placeId);
+          deleteStmt.setString(1, placeId);
           int rowsDeleted = deleteStmt.executeUpdate();
 
           // Return true if a row was deleted
@@ -230,10 +305,12 @@ public class TravelController {
     return false;
   }
 
-
   public boolean editPlannedTrip(String placeName, String description) {
+    System.out.println("Editing trip: " + placeName + " with new details: " + description);
+
     // Step 1: Query to fetch place_id based on placeName from the places table
-    String selectPlaceIdQuery = "SELECT location_id FROM places WHERE places_name = ?";
+    String selectPlaceIdQuery = "SELECT places_name FROM places WHERE places_name = ?";
+
     // Step 2: Update additional_information in planned_trips using place_id
     String updatePlannedTripQuery = "UPDATE planned_trips SET additional_information = ? WHERE place_id = ?";
 
@@ -245,16 +322,23 @@ public class TravelController {
       selectPlaceIdStmt.setString(1, placeName);
       try (ResultSet rs = selectPlaceIdStmt.executeQuery()) {
         if (rs.next()) {
-          int placeId = rs.getInt("location_id");
+          // Get the place_id from the result set
+          String placeId = rs.getString("places_name");
 
-          // Update additional_information in planned_trips using the place_id
-          updatePlannedTripStmt.setString(1, description);
-          updatePlannedTripStmt.setInt(2, placeId);
+          // Step 3: Update additional_information in planned_trips using place_id
+          updatePlannedTripStmt.setString(1, description);  // Set the description to be updated
+          updatePlannedTripStmt.setString(2, placeId);  // Set the correct place_id
+
           int rowsUpdated = updatePlannedTripStmt.executeUpdate();
 
-          // Show updated table and return success status
-          showNext("planned_trips");
-          return rowsUpdated > 0;
+          // If update was successful, return true
+          if (rowsUpdated > 0) {
+            System.out.println("Trip updated successfully.");
+            showNext("planned");  // Update the UI
+            return true;
+          } else {
+            System.out.println("No rows were updated.");
+          }
         } else {
           System.out.println("Place name not found: " + placeName);
         }
@@ -263,59 +347,15 @@ public class TravelController {
       e.printStackTrace();
     }
 
-    // Show table and return false if operation fails
-    showNext("planned_trips");
+    // Return false if update failed
+    showNext("planned");
     return false;
   }
-
-
-  public boolean toggleTripCompletion(String placeName) {
-    // Query to fetch location_id and current completion status based on places_name
-    String selectQuery = "SELECT place_id, completed FROM planned_trips WHERE places_name = ?";
-    // Query to update the completion status based on location_id
-    String updateQuery = "UPDATE planned_trips SET completed = ? WHERE place_id = ?";
-
-    try (
-            // Prepare statements for both SELECT and UPDATE queries
-            PreparedStatement selectStmt = connection.prepareStatement(selectQuery);
-            PreparedStatement updateStmt = connection.prepareStatement(updateQuery)
-    ) {
-      // Step 1: Fetch the location_id and current completion status
-      selectStmt.setString(1, placeName); // Bind placeName to the SELECT query
-      try (ResultSet rs = selectStmt.executeQuery()) {
-        if (rs.next()) {
-          // Retrieve location_id and current completion status
-          int locationId = rs.getInt("location_id");
-          boolean currentStatus = rs.getBoolean("completed");
-          // Toggle the status
-          boolean newStatus = !currentStatus;
-
-          // Step 2: Update the new completion status
-          updateStmt.setBoolean(1, newStatus); // Bind new completion status
-          updateStmt.setInt(2, locationId);    // Bind location_id to the UPDATE query
-          int rowsUpdated = updateStmt.executeUpdate();
-
-          // Return true if the update was successful
-          return rowsUpdated > 0;
-        } else {
-          // Handle the case where no record is found
-          System.out.println("Place name not found in the database: " + placeName);
-        }
-      }
-    } catch (SQLException e) {
-      // Print the stack trace for debugging
-      e.printStackTrace();
-    }
-
-    // Return false if toggling fails
-    return false;
-  }
-
 
 
   public String getTripNotes(String tripName) {
     String additionalInfo = "";
-    String query = " SELECT additional_information FROM planned_trips WHERE place_id = ( SELECT location_id FROM places WHERE places_name = ?)";
+    String query = " SELECT additional_information FROM planned_trips WHERE place_id = ( SELECT places_name FROM places WHERE places_name = ?)";
 
     try (PreparedStatement stmt = connection.prepareStatement(query)) {
       // Set the trip name parameter
@@ -331,6 +371,9 @@ public class TravelController {
       e.printStackTrace(); // Log the exception
     }
 
+    if (additionalInfo == null) {
+      additionalInfo = "";
+    }
     return additionalInfo.isEmpty() ? "No additional information available" : additionalInfo;
   }
 
@@ -340,7 +383,7 @@ public class TravelController {
     List<String> wishlist = new ArrayList<>();
     String query = "SELECT places.places_name " +
             "FROM wishlist " +
-            "JOIN places ON wishlist.place_id = places.location_id;";
+            "JOIN places ON wishlist.place_id = places.places_name;";
 
     try (PreparedStatement stmt = connection.prepareStatement(query);
          ResultSet rs = stmt.executeQuery()) {
@@ -407,9 +450,9 @@ public class TravelController {
     }
   }
 
-
   public boolean deleteWishlistPlace(String placeName) {
-    String placeQuery = "SELECT location_id FROM places WHERE places_name = ?";
+    // SQL queries
+    String placeQuery = "SELECT places_name FROM places WHERE places_name = ?";
     String deleteQuery = "DELETE FROM wishlist WHERE user_id = ? AND place_id = ?";
 
     try (PreparedStatement placeStmt = connection.prepareStatement(placeQuery);
@@ -422,11 +465,12 @@ public class TravelController {
           // If place doesn't exist, return false
           return false;
         }
-        int placeId = rs.getInt("location_id");
+
+        String placeId = rs.getString("places_name");  // Retrieve the place_id (integer type)
 
         // Step 2: Delete from wishlist where user_id and place_id match
-        deleteStmt.setInt(1, userId);
-        deleteStmt.setInt(2, placeId);
+        deleteStmt.setInt(1, userId);  // Set user_id parameter
+        deleteStmt.setString(2, placeId); // Set place_id parameter (integer type)
         int rowsAffected = deleteStmt.executeUpdate();
 
         showNext("wishlist");
@@ -438,6 +482,7 @@ public class TravelController {
       return false;
     }
   }
+
 
 
   // ------------------- CLOSE CONNECTION -------------------
@@ -460,10 +505,10 @@ public class TravelController {
 
     String query = "SELECT p.country, p.calculated_rating, GROUP_CONCAT(a.activities_name) AS activities, p.food "
             + "FROM places p "
-            + "LEFT JOIN place_activities pa ON p.location_id = pa.place_id "
+            + "LEFT JOIN place_activities pa ON p.places_name = pa.place_id "
             + "LEFT JOIN activities a ON pa.activity_id = a.activity_id "
             + "WHERE p.places_name = ? "
-            + "GROUP BY p.location_id";
+            + "GROUP BY p.places_name";
 
     try (PreparedStatement ps = connection.prepareStatement(query)) {
       ps.setString(1, placeName);  // Set the placeName parameter
@@ -546,4 +591,32 @@ public class TravelController {
     frame.revalidate();
     frame.repaint();
   }
+
+  public void addNewPlace(String placeName, String country, String food, float calculatedRating) {
+    // SQL query to insert new place
+    String query = "INSERT INTO places (places_name, country, food, calculated_rating) VALUES (?, ?, ?, ?)";
+
+    // Assuming 'connection' is already defined and established outside this method
+    try (PreparedStatement preparedStatement = this.connection.prepareStatement(query)) {
+
+      // Set the parameters for the query
+      preparedStatement.setString(1, placeName);
+      preparedStatement.setString(2, country);
+      preparedStatement.setString(3, food);
+      preparedStatement.setFloat(4, calculatedRating);
+
+      // Execute the query
+      int rowsAffected = preparedStatement.executeUpdate();
+
+      if (rowsAffected > 0) {
+        System.out.println("New place added successfully!");
+      } else {
+        System.out.println("Failed to add the place.");
+      }
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+
 }

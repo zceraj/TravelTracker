@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="DatabasesProject:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/DatabasesProject_jar</output-path>
+    <root id="archive" name="DatabasesProject.jar">
+      <element id="module-output" name="DatabasesProject" />
+      <element id="library" level="project" name="mysql-connector-j-9.1.0" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../mysql-connector-j-9.1.0/mysql-connector-j-9.1.0.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
